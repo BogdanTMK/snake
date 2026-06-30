@@ -4,6 +4,17 @@
   <title>Welcome to Snake!</title>
 </head>
 <body>
-  Welcome to Snake!!!!
+<canvas id="gameCanvas" width="300" height="300"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+  </script>
+  
 </body>
 </html>
