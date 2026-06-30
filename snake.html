@@ -63,6 +63,14 @@
     }
 
     let snake = getSnakePosition();
+
+    function clearCanvas() {
+      ctx.fillStyle = '#16213e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#0f3460';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
     // velocity
     let dx = 10;
     let dy = 0;
@@ -93,7 +101,7 @@
     }
 
     
-
+    clearCanvas();
     drawSnake();
 
   </script>
