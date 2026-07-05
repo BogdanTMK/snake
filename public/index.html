@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome to Snake!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+ 
+    canvas {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      box-shadow: 0 0 20px rgba(15, 52, 96, 0.5);
+    }
+ 
+    #score {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      font-size: 28px;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+      letter-spacing: 2px;
+      z-index: 10;             
+    }
+    #gameOverScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease-in;
+    }
+ 
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+ 
+    #gameOverContent {
+      background: linear-gradient(145deg, #1a1a2e, #16213e);
+      padding: 40px;
+      border-radius: 20px;
+      border: 2px solid #0f3460;
+      box-shadow: 0 0 60px rgba(15, 52, 96, 0.5);
+      text-align: center;
+      max-width: 550px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease-out;
+    }
+ 
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+ 
+    #gameOverContent h1 {
+      color: #ff6b6b;
+      font-family: 'Courier New', monospace;
+      font-size: 48px;
+      text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+      margin-bottom: 5px;
+    }
+ 
+    #finalScore {
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      font-size: 32px;
+      margin: 10px 0 20px 0;
+    }
+ 
+    #top10Badge {
+      color: #ffd93d;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 0 0 20px rgba(255, 217, 61, 0.3);
+      margin-bottom: 15px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+ 
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+ 
+    #nameInputContainer {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+ 
+    #playerNameInput {
+      padding: 12px 18px;
+      font-size: 18px;
+      border: 2px solid #0f3460;
+      border-radius: 10px;
+      background: #0a0a1a;
+      color: white;
+      width: 220px;
+      transition: border-color 0.3s;
+    }
+ 
+    #playerNameInput:focus {
+      outline: none;
+      border-color: #00ff88;
+    }
+ 
+    #playerNameInput::placeholder {
+      color: #666;
+    }
+ 
+    button {
+      padding: 12px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+ 
+    #saveScoreBtn {
+      background: linear-gradient(145deg, #00ff88, #00cc66);
+      color: #1a1a2e;
+    }
+ 
+    #saveScoreBtn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+ 
+    #saveScoreBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+ 
+    #restartBtn {
+      background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
+      color: white;
+      margin: 5px 0 20px 0;
+      width: 100%;
+    }
+ 
+    #restartBtn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+    }
+ 
+    #leaderboard {
+      margin-top: 20px;
+      border-top: 2px solid #0f3460;
+      padding-top: 20px;
+    }
+ 
+    #leaderboard h2 {
+      color: #ffd93d;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 20px rgba(255, 217, 61, 0.2);
+    }
+ 
+    #leaderboardList {
+      color: white;
+      font-family: 'Courier New', monospace;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+ 
+    #leaderboardList::-webkit-scrollbar {
+      width: 6px;
+    }
+ 
+    #leaderboardList::-webkit-scrollbar-track {
+      background: #0a0a1a;
+      border-radius: 3px;
+    }
+ 
+    #leaderboardList::-webkit-scrollbar-thumb {
+      background: #0f3460;
+      border-radius: 3px;
+    }
+ 
+    .leaderboard-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid #16213e;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+ 
+    .leaderboard-item:hover {
+      background: #16213e;
+    }
+ 
+    .leaderboard-item .rank {
+      color: #ffd93d;
+      font-weight: bold;
+      width: 35px;
+    }
+ 
+    .leaderboard-item .name {
+      flex: 1;
+      margin: 0 10px;
+      color: #e0e0e0;
+    }
+ 
+    .leaderboard-item .score {
+      color: #00ff88;
+      font-weight: bold;
+    }
+ 
+    .leaderboard-item.top1 .rank { color: #ffd700; }
+    .leaderboard-item.top2 .rank { color: #c0c0c0; }
+    .leaderboard-item.top3 .rank { color: #cd7f32; }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas"></canvas>
+  <div id="gameOverScreen" style="display: none;">
+  <div id="gameOverContent">
+    <h1>GAME OVER</h1>
+    <div id="finalScore">Score: 0</div>
+    
+    <div id="top10Badge" style="display: none;">
+      TOP 10!
+    </div>
+    
+    <div id="nameInputContainer">
+      <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="50">
+      <button id="saveScoreBtn">Save Score</button>
+    </div>
+    
+    <button id="restartBtn">Play Again</button>
+    
+    <div id="leaderboard">
+      <h2>Leaderboard</h2>
+      <div id="leaderboardList">
+        <div style="text-align:center;color:#666;">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+ 
+    // Размеры холста, кратны десяти для ровных клеток
+    function resizeCanvas() {
+      const size = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.95);
+      const gridSize = Math.floor(size / 10) * 10;
+      canvas.width = gridSize;
+      canvas.height = gridSize;
+    }
+ 
+    resizeCanvas();
+    // Ресайз
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      drawSnake();
+    });
+ 
+    // Размещение змеи по центру
+    function getSnakePosition() {
+      const cellSize = 10;
+      const cellCount = canvas.width / cellSize;
+      const center = Math.floor(cellCount / 2) * cellSize;
+      
+      return [
+        {x: center, y: center},
+        {x: center - cellSize, y: center},
+        {x: center - cellSize * 2, y: center},
+        {x: center - cellSize * 3, y: center},
+        {x: center - cellSize * 4, y: center}
+      ];
+    }
+    // Переменные
+    let snake = getSnakePosition();
+    let dx = 10;
+    let dy = 0;
+    let foodX;
+    let foodY;
+    let score = 0;
+    let speed = 100;
+    let changingDirection = false;
+    // 
+    function clearCanvas() {
+      ctx.fillStyle = '#16213e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#0f3460';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
+ 
+    // Рисуем
+ 
+    function drawSnakePart(snakePart) {
+      ctx.fillStyle = '#8b0000';
+      ctx.shadowColor = '#dc143c';
+      ctx.shadowBlur = 2;
+      ctx.fillRect(snakePart.x, snakePart.y, 10, 10);
+      
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#4a0000';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(snakePart.x, snakePart.y, 10, 10);
+    }
+ 
+    function drawSnake() {
+      snake.forEach(drawSnakePart);
+    }
+ 
+    function drawFood() {
+      ctx.fillStyle = 'green';
+      ctx.strokeStyle = 'darkgreen';
+      ctx.fillRect(foodX, foodY, 10, 10);
+      ctx.strokeRect(foodX, foodY, 10, 10);
+    }
+ 
+    // Направление 
+    document.addEventListener('keydown', changeDirection);
+    function changeDirection(event) {
+      const LEFT_KEY = 37;
+      const RIGHT_KEY = 39;
+      const UP_KEY = 38;
+      const DOWN_KEY = 40;
+ 
+      if (changingDirection) return;
+      changingDirection = true;
+      
+      const keyPressed = event.keyCode;
+      const goingUp = dy === -10;
+      const goingDown = dy === 10;
+      const goingRight = dx === 10;
+      const goingLeft = dx === -10;
+      
+      if (keyPressed === LEFT_KEY && !goingRight) {
+        dx = -10;
+        dy = 0;
+      }
+      
+      if (keyPressed === UP_KEY && !goingDown) {
+        dx = 0;
+        dy = -10;
+      }
+      
+      if (keyPressed === RIGHT_KEY && !goingLeft) {
+        dx = 10;
+        dy = 0;
+      }
+      
+      if (keyPressed === DOWN_KEY && !goingDown) {
+        dx = 0;
+        dy = 10;
+      }
+    }
+    // Движение
+    function advanceSnake() {
+      const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+      snake.unshift(head);
+      const didEatFood = snake[0].x === foodX && snake[0].y === foodY;
+      if (didEatFood) {
+        score += 10;
+        speed -= 5;
+        document.getElementById('score').textContent = 'Score: ' + score;
+        createFood();
+      }
+      else {
+        snake.pop();
+      }
+    }
+    // Game over
+    function didGameEnd() {
+      for (let i = 4; i < snake.length; i++) {
+        const didCollide = snake[i].x === snake[0].x && snake[i].y === snake[0].y;
+        if (didCollide) return true;
+      }
+      
+      const hitLeftWall = snake[0].x < 0;
+      const hitRightWall = snake[0].x > canvas.width - 10;
+      const hitTopWall = snake[0].y < 0;
+      const hitBottomWall = snake[0].y > canvas.height - 10;
+      
+      return hitLeftWall || hitRightWall || hitTopWall || hitBottomWall;
+    }
+    // Еда
+    function randomTen(min, max) {
+      return Math.round((Math.random() * (max - min) + min) / 10) * 10;
+    }
+    function createFood() {
+      foodX = randomTen(0, canvas.width - 10);
+      foodY = randomTen(0, canvas.height - 10);
+      
+      snake.forEach(function isFoodOnSnake(part) {
+        const foodIsOnSnake = part.x === foodX && part.y === foodY;
+        if (foodIsOnSnake) {
+          createFood();
+        }
+      });
+    }
+ 
+    //Game Over экран
+ 
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+ 
+    async function checkTop10() {
+      const badge = document.getElementById('top10Badge');
+      const nameContainer = document.getElementById('nameInputContainer');
+      try {
+        const res = await fetch('/api/leaderboard/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score })
+        });
+        const data = await res.json();
+        if (data.isTop10) {
+          badge.style.display = 'block';
+          nameContainer.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+          nameContainer.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Ошибка проверки топ-10:', err);
+        badge.style.display = 'none';
+        nameContainer.style.display = 'none';
+      }
+    }
+ 
+    async function loadLeaderboard() {
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = '<div style="text-align:center;color:#666;">Loading...</div>';
+      try {
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        if (!data.length) {
+          list.innerHTML = '<div style="text-align:center;color:#666;">No scores yet</div>';
+          return;
+        }
+        list.innerHTML = data.map((entry, i) => {
+          const rankClass = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+          return `<div class="leaderboard-item ${rankClass}">
+            <span class="rank">#${i + 1}</span>
+            <span class="name">${escapeHtml(entry.player_name)}</span>
+            <span class="score">${entry.score}</span>
+          </div>`;
+        }).join('');
+      } catch (err) {
+        list.innerHTML = '<div style="text-align:center;color:#ff6b6b;">Failed to load leaderboard</div>';
+      }
+    }
+ 
+    function endGame() {
+      document.getElementById('finalScore').textContent = 'Score: ' + score;
+      document.getElementById('gameOverScreen').style.display = 'flex';
+      checkTop10();
+      loadLeaderboard();
+    }
+ 
+    document.getElementById('saveScoreBtn').addEventListener('click', async () => {
+      const input = document.getElementById('playerNameInput');
+      const btn = document.getElementById('saveScoreBtn');
+      const name = input.value.trim();
+ 
+      if (!name) {
+        input.focus();
+        return;
+      }
+ 
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+ 
+      try {
+        const res = await fetch('/api/leaderboard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName: name, score })
+        });
+        if (!res.ok) throw new Error('save failed');
+ 
+        input.disabled = true;
+        btn.textContent = 'Saved!';
+        loadLeaderboard();
+      } catch (err) {
+        btn.textContent = 'Error, try again';
+        btn.disabled = false;
+      }
+    });
+ 
+    document.getElementById('restartBtn').addEventListener('click', resetGame);
+ 
+    function resetGame() {
+      snake = getSnakePosition();
+      dx = 10;
+      dy = 0;
+      score = 0;
+      speed = 100;
+      changingDirection = false;
+ 
+      document.getElementById('score').textContent = 'Score: 0';
+      document.getElementById('gameOverScreen').style.display = 'none';
+ 
+      const input = document.getElementById('playerNameInput');
+      input.value = '';
+      input.disabled = false;
+ 
+      const btn = document.getElementById('saveScoreBtn');
+      btn.disabled = false;
+      btn.textContent = 'Save Score';
+ 
+      createFood();
+      clearCanvas();
+      drawSnake();
+      main();
+    }
+ 
+    clearCanvas();
+    drawSnake();
+ 
+    function main() {
+      if (didGameEnd()) {
+        endGame();
+        return;
+      }
+ 
+      setTimeout(function onTick() {
+        changingDirection = false;
+        clearCanvas();
+        drawFood();
+        advanceSnake();
+        drawSnake();
+        main();
+      }, speed);
+    }
+ 
+    // Старт
+    createFood();
+    main();
+ 
+  </script>
+</body>
+</html>
