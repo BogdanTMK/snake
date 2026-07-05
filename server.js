@@ -14,7 +14,7 @@ fastify.register(staticPlugin, {
 });
  
 fastify.register(postgres, {
-  connectionString: 'postgres://postgres@localhost:5432/snake_db'
+  connectionString: process.env.DATABASE_URL
 });
  
 // Создание таблицы при запуске
@@ -88,8 +88,8 @@ fastify.post('/api/leaderboard/check', async (request, reply) => {
  
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000, host: '0.0.0.0' });
-    console.log('Server running on http://localhost:3000');
+    await fastify.listen({ port: process.env.PORT || 3000, host: '0.0.0.0' });
+    console.log('Server running');
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
